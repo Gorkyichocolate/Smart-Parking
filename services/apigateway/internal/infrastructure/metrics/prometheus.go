@@ -1,0 +1,1 @@
+// Package metrics contains Prometheus metrics setup
