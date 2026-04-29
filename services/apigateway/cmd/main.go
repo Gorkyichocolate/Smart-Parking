@@ -1,4 +1,3 @@
-package cmd
 package main
 
 import (
@@ -8,3 +7,18 @@ import (
 func main() {
 	log.Println("API Gateway starting...")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
