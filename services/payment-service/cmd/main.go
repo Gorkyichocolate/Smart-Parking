@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
+	"payment-service/internal/delivery/grpc"
 	"payment-service/internal/infrastructer/rabbitmq"
+	repoImpl "payment-service/internal/infrastructer/repository"
+	"payment-service/internal/usecase"
 	"smart-parking/pkg/config"
 	"smart-parking/pkg/postgres"
 	"smart-parking/pkg/rabbitmq/connection"
@@ -30,29 +32,40 @@ func main() {
 		config.PaymentDatabaseURL,
 		config.PaymentDatabaseName,
 	)
-	
 
 	db, err := postgres.New(dsn)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	
+
 	_ = db
 
 	// rabbitmq
-	
+
 	conn := connection.New("amqp://guest:guest@localhost:5672/")
-	ch, _ := conn.Channel()
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open a channel: %v", err)
+	}
+	defer ch.Close()
 
 	pub := publisher.New(ch, "events")
 	paymentPub := rabbitmq.NewPaymentPublisher(pub)
 
-	for {
-		paymentPub.PublishPaymentCreated(rabbitmq.PaymentCreated{
-			ID:     "123",
-			Amount: 50,
-		})
+	// repository
+	repo := repoImpl.NewPaymentRepo(db)
 
-		time.Sleep(5 * time.Second)
+	// usecase
+	usecase := usecase.NewPaymentUseCase(repo, paymentPub)
+
+	// handler
+	handler := grpc.NewHandler(usecase)
+
+	// Simulate creating a payment
+	err = handler.CreatePayment(nil)
+	if err != nil {
+		log.Fatalf("Failed to create payment: %v", err)
 	}
 }

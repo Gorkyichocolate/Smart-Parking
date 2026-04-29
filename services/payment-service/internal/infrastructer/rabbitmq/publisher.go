@@ -1,8 +1,8 @@
 package rabbitmq
 
-
 import (
 	"encoding/json"
+	"payment-service/internal/domain"
 
 	"smart-parking/pkg/rabbitmq/publisher"
 )
@@ -15,13 +15,9 @@ func NewPaymentPublisher(pub *publisher.Publisher) *PaymentPublisher {
 	return &PaymentPublisher{pub: pub}
 }
 
-type PaymentCreated struct {
-	ID     string  `json:"id"`
-	Amount float64 `json:"amount"`
-}
+func (p *PaymentPublisher) PublishPaymentCreated(payment domain.Payment) {
 
-func (p *PaymentPublisher) PublishPaymentCreated(event PaymentCreated) {
-	body, _ := json.Marshal(event)
+	body, _ := json.Marshal(payment)
 
 	p.pub.Publish("payment.created", body)
 }
