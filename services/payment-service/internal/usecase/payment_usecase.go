@@ -9,24 +9,44 @@ type PaymentPublisher interface {
 	PublishPaymentCreated(payment domain.Payment)
 }
 
-type PaymentUseCase struct {
-	repo      repository.PaymentRepository
-	publisher PaymentPublisher
+type PaymentUsecase struct {
+	paymentRepo repository.PaymentRepository
+	invoiceRepo repository.InvoiceRepository
+	publisher   PaymentPublisher
 }
 
-func NewPaymentUseCase(r repository.PaymentRepository, p PaymentPublisher) *PaymentUseCase {
-	return &PaymentUseCase{
-		repo:      r,
-		publisher: p,
+func NewPaymentUsecase(
+	p repository.PaymentRepository,
+	i repository.InvoiceRepository,
+	pub PaymentPublisher,
+) *PaymentUsecase {
+	return &PaymentUsecase{
+		paymentRepo: p,
+		invoiceRepo: i,
+		publisher:   pub,
 	}
 }
 
-func (u *PaymentUseCase) CreatePayment(p domain.Payment) error {
-	err := u.repo.CreatePayment(p)
-	if err != nil {
+func (u *PaymentUsecase) CreatePayment(p domain.Payment) error {
+	// 1. payment
+	if err := u.paymentRepo.CreatePayment(p); err != nil {
 		return err
 	}
 
+	// 2. invoice
+	invoice := domain.Invoice{
+		ID:        "inv_" + p.ID,
+		PaymentID: p.ID,
+		UserID:    p.UserID,
+		Amount:    p.Amount,
+		PDFUrl:    "",
+	}
+
+	if err := u.invoiceRepo.Create(invoice); err != nil {
+		return err
+	}
+
+	// 3. event
 	u.publisher.PublishPaymentCreated(p)
 
 	return nil

@@ -55,7 +55,14 @@ func main() {
 	paymentPub := rabbitmq.NewPaymentPublisher(pub)
 
 	// repository
-	repo := repoImpl.NewPaymentRepo(db)
+	paymentRepo := repoImpl.NewPaymentRepo(db)
+	invoiceRepo := repoImpl.NewInvoiceRepo(db)
+
+	usecase := usecase.NewPaymentUsecase(
+		paymentRepo,
+		invoiceRepo,
+		paymentPub,
+	)
 
 	// usecase
 	usecase := usecase.NewPaymentUseCase(repo, paymentPub)

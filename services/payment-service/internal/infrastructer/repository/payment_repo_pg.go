@@ -14,19 +14,36 @@ func NewPaymentRepo(db *sql.DB) *paymentRepo {
 }
 
 func (r *paymentRepo) CreatePayment(p domain.Payment) error {
-	_, err := r.db.Exec("INSERT INTO payments (id, amount, name, email) VALUES ($1, $2, $3, $4)",
-		p.ID, p.Amount, p.Name, p.Email)
+	_, err := r.db.Exec(
+		`INSERT INTO payments 
+		(id, booking_id, user_id, amount, status, payment_method)
+		VALUES ($1, $2, $3, $4, $5, $6)`,
+		p.ID,
+		p.BookingID,
+		p.UserID,
+		p.Amount,
+		p.Status,
+		p.PaymentMethod,
+	)
 	return err
 }
-
 func (r *paymentRepo) GetPaymentByID(id string) (domain.Payment, error) {
 	var p domain.Payment
-	err := r.db.QueryRow("SELECT id, amount, name, email FROM payments WHERE id = $1", id).
-		Scan(&p.ID, &p.Amount, &p.Name, &p.Email)
-	return p, err
-}
 
-func (r *paymentRepo) DeletePayment(id string) error {
-	_, err := r.db.Exec("DELETE FROM payments WHERE id = $1", id)
-	return err
+	err := r.db.QueryRow(
+		`SELECT id, booking_id, user_id, amount, status, payment_method, created_at, updated_at
+		 FROM payments WHERE id=$1`,
+		id,
+	).Scan(
+		&p.ID,
+		&p.BookingID,
+		&p.UserID,
+		&p.Amount,
+		&p.Status,
+		&p.PaymentMethod,
+		&p.CreatedAt,
+		&p.UpdatedAt,
+	)
+
+	return p, err
 }

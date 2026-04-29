@@ -1,8 +1,14 @@
 package domain
 
+import "time"
+
 type Payment struct {
-	ID     string  `json:"id"`
-	Amount float64 `json:"amount"`
-	Name   string  `json:"name"`
-	Email  string  `json:"email"`
+	ID            string
+	BookingID     string
+	UserID        string
+	Amount        float64
+	Status        string
+	PaymentMethod string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
