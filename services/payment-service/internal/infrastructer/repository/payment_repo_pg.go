@@ -9,6 +9,11 @@ type paymentRepo struct {
 	db *sql.DB
 }
 
+// DeletePayment implements [repository.PaymentRepository].
+func (r *paymentRepo) DeletePayment(id string) error {
+	panic("unimplemented")
+}
+
 func NewPaymentRepo(db *sql.DB) *paymentRepo {
 	return &paymentRepo{db: db}
 }

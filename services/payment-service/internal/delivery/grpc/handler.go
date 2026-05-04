@@ -5,7 +5,8 @@ import (
 
 	"payment-service/internal/domain"
 	"payment-service/internal/usecase"
-	pb "smart-parking/proto"
+
+	pb "github.com/Gorkyichocolate/Smart-Parking-Proto/proto/payment"
 )
 
 type Handler struct {
@@ -20,7 +21,6 @@ func NewHandler(u *usecase.PaymentUsecase) *Handler {
 func (h *Handler) CreatePayment(ctx context.Context, req *pb.CreatePaymentRequest) (*pb.CreatePaymentResponse, error) {
 
 	payment := domain.Payment{
-		ID:        req.Id,
 		BookingID: req.BookingId,
 		UserID:    req.UserId,
 		Amount:    req.Amount,
@@ -32,6 +32,7 @@ func (h *Handler) CreatePayment(ctx context.Context, req *pb.CreatePaymentReques
 	}
 
 	return &pb.CreatePaymentResponse{
-		Success: true,
+		Id:     payment.ID,
+		Status: "created",
 	}, nil
 }

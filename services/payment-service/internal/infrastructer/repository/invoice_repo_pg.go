@@ -9,6 +9,11 @@ type invoiceRepo struct {
 	db *sql.DB
 }
 
+// Create implements [repository.InvoiceRepository].
+func (r *invoiceRepo) Create(invoice domain.Invoice) error {
+	panic("unimplemented")
+}
+
 func NewInvoiceRepo(db *sql.DB) *invoiceRepo {
 	return &invoiceRepo{db: db}
 }

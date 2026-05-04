@@ -1,7 +1,7 @@
-go 1.22.2
+go 1.24.5
 
 use (
-    ./pkg
-    ./services/payment-service
-    ./services/notification-service
+	./pkg
+	./services/notification-service
+	./services/payment-service
 )

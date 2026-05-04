@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-
-	"payment-service/internal/delivery/grpc"
 	"payment-service/internal/infrastructer/rabbitmq"
-	repoImpl "payment-service/internal/infrastructer/repository"
+	"payment-service/internal/repository"
 	"payment-service/internal/usecase"
 	"smart-parking/pkg/config"
 	"smart-parking/pkg/postgres"
@@ -54,25 +52,13 @@ func main() {
 	pub := publisher.New(ch, "events")
 	paymentPub := rabbitmq.NewPaymentPublisher(pub)
 
-	// repository
-	paymentRepo := repoImpl.NewPaymentRepo(db)
-	invoiceRepo := repoImpl.NewInvoiceRepo(db)
+	// 1. repo
+	paymentRepo := repository.NewPaymentRepository(db)
+	invoiceRepo := repository.NewInvoiceRepository(db)
 
-	usecase := usecase.NewPaymentUsecase(
-		paymentRepo,
-		invoiceRepo,
-		paymentPub,
-	)
+	// 2. publisher (RabbitMQ)
+	publisher := rabbitmq.NewPublisher(conn)
 
-	// usecase
-	usecase := usecase.NewPaymentUseCase(repo, paymentPub)
-
-	// handler
-	handler := grpc.NewHandler(usecase)
-
-	// Simulate creating a payment
-	err = handler.CreatePayment(nil)
-	if err != nil {
-		log.Fatalf("Failed to create payment: %v", err)
-	}
+	// 3. usecase
+	uc := usecase.NewPaymentUsecase(paymentRepo, invoiceRepo, paymentPub)
 }
