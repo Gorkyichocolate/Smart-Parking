@@ -42,7 +42,7 @@ func (u *PaymentUsecase) CreatePayment(p domain.Payment) error {
 		PDFUrl:    "",
 	}
 
-	if err := u.invoiceRepo.Create(invoice); err != nil {
+	if err := u.invoiceRepo.CreateInvoice(invoice); err != nil {
 		return err
 	}
 

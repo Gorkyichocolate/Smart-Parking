@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"payment-service/internal/infrastructer/rabbitmq"
-	"payment-service/internal/repository"
+	"payment-service/internal/infrastructer/repository"
 	"payment-service/internal/usecase"
 	"smart-parking/pkg/config"
 	"smart-parking/pkg/postgres"
@@ -53,12 +53,19 @@ func main() {
 	paymentPub := rabbitmq.NewPaymentPublisher(pub)
 
 	// 1. repo
-	paymentRepo := repository.NewPaymentRepository(db)
-	invoiceRepo := repository.NewInvoiceRepository(db)
+	paymentRepo := repository.NewPaymentRepo(db)
+	invoiceRepo := repository.NewInvoiceRepo(db)
 
 	// 2. publisher (RabbitMQ)
-	publisher := rabbitmq.NewPublisher(conn)
+	publisher, err := rabbitmq.NewPaymentPublisher(pub)
+	if err != nil {
+		log.Fatalf("Failed to create publisher: %v", err)
+	}
+
 
 	// 3. usecase
-	uc := usecase.NewPaymentUsecase(paymentRepo, invoiceRepo, paymentPub)
+	uc, err := usecase.NewPaymentUsecase(paymentRepo, invoiceRepo, paymentPub)
+	if err != nil {
+		log.Fatalf("Failed to create usecase: %v", err)
+	}
 }
