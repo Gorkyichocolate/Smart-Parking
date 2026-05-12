@@ -31,12 +31,6 @@ type Consumer struct {
 	rabbitMQURL    string // Добавляем поле для URL
 }
 
-// MessageHandler интерфейс обработчика сообщений
-type MessageHandler interface {
-	Handle(ctx context.Context, delivery amqp.Delivery) error
-	GetQueueName() string
-}
-
 // NewConsumer создает нового потребителя
 func NewConsumer(rabbitMQURL string, config ConsumerConfig, handler MessageHandler) (*Consumer, error) {
 	consumer := &Consumer{

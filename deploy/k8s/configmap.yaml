@@ -1,0 +1,9 @@
+# deploy/k8s/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: smart-parking
+data:
+  PAYMENT_DATABASE_URL: "postgres://payment_service_user:123456@postgres:5432/payment_service_db?sslmode=disable"
+  RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"

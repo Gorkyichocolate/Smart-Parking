@@ -1,0 +1,31 @@
+# deploy/k8s/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: smart-parking
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - name: grpc
+      port: 50052
+      targetPort: 50052
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: smart-parking
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+  type: ClusterIP

@@ -8,36 +8,35 @@ import (
 	"syscall"
 	"time"
 
-	"smart-parking/pkg/config"
+	"github.com/GorkyiChocolate/smart-parking/pkg/config"
 
-	"notification-service/internal/email"
-	"notification-service/internal/queue"
+	"github.com/GorkyiChocolate/smart-parking/pkg/metrics"
+
+	"github.com/GorkyiChocolate/smart-parking/services/notification-service/internal/email"
+	"github.com/GorkyiChocolate/smart-parking/services/notification-service/internal/queue"
 )
 
 func main() {
-	// Загружаем конфиг из общего пакета
+	// Initialize metrics
+	metrics.InitMetrics("notification_service")
+	metrics.StartMetricsServer("9090")
+
+	// Load config
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}
 
-	// Конвертируем SMTP_PORT из строки в int (если нужно)
-	smtpPort := 587 // значение по умолчанию
-	if cfg.SMTP_PORT != "" {
-		// Если в вашем Config SMTP_PORT это string, конвертируем
-		// Если у вас в Config SMTP_PORT уже int, то этот блок не нужен
-	}
-
 	// Initialize email sender
 	emailSender := email.NewSMTPSender(
 		cfg.SMTP_HOST,
-		smtpPort,
+		cfg.SMTP_PORT,
 		cfg.SMTP_USERNAME,
 		cfg.SMTP_PASSWORD,
 		cfg.SMTP_FROM,
 	)
 
-	// Create email handler
+	// Create email handler with metrics
 	emailHandler := queue.NewEmailHandler(
 		"booking.notifications",
 		emailSender,
@@ -52,7 +51,7 @@ func main() {
 		MaxReconnectAttempts: 10,
 	}
 
-	// Create consumer (используем cfg.RABBITMQURL)
+	// Create consumer
 	consumer, err := queue.NewConsumer(
 		cfg.RABBITMQURL,
 		consumerConfig,
@@ -72,6 +71,7 @@ func main() {
 	log.Println("📡 Waiting for messages from RabbitMQ...")
 	log.Printf("   Queue: booking.notifications")
 	log.Printf("   RabbitMQ URL: %s", cfg.RABBITMQURL)
+	log.Printf("   Metrics endpoint: http://localhost:9090/metrics")
 	log.Println("   Press Ctrl+C to stop")
 
 	// Graceful shutdown

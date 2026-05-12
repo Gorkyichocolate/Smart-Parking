@@ -1,0 +1,112 @@
+# docker/docker-compose.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: smart-parking-postgres
+    environment:
+      POSTGRES_USER: payment_service_user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: payment_service_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smart-parking-network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: smart-parking-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - smart-parking-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: smart-parking-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - smart-parking-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: smart-parking-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - smart-parking-network
+
+  payment-service:
+    build:
+      context: ../services/payment-service
+      dockerfile: Dockerfile
+    container_name: smart-parking-payment
+    environment:
+      - PAYMENT_DATABASE_URL=postgres://payment_service_user:123456@postgres:5432/payment_service_db?sslmode=disable
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+    ports:
+      - "50052:50052"
+      - "9091:9090"
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - smart-parking-network
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    container_name: smart-parking-notification
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-notifications@smartparking.com}
+      - MAX_RETRIES=3
+      - ENVIRONMENT=development
+    ports:
+      - "9092:9090"
+    depends_on:
+      - rabbitmq
+    networks:
+      - smart-parking-network
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  smart-parking-network:
+    driver: bridge

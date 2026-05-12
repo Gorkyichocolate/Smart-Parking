@@ -6,4 +6,5 @@ use (
 	./services/apigateway
 	./services/notification-service
 	./services/payment-service
+	pkg/metrics
 )

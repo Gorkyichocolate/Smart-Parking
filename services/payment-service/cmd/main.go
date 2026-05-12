@@ -15,24 +15,24 @@ import (
 
 	paymentpb "github.com/GorkyiChocolate/smart-parking-proto/gen/go/payment"
 
+	"github.com/GorkyiChocolate/smart-parking/pkg/config"
+	"github.com/GorkyiChocolate/smart-parking/pkg/metrics"
 	grpchandler "github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/delivery/grpc"
 	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/infrastructer/rabbitmq"
 	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/infrastructer/repository"
 	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/usecase"
-
-	"github.com/GorkyiChocolate/smart-parking/pkg/config"
 )
 
 func main() {
+	// Init metrics
+	metrics.InitMetrics("payment_service")
+	metrics.StartMetricsServer("9090")
+
 	// Load config
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}
-
-	// Убираем логирование конфиденциальных данных
-	// Просто лог о подключении к БД без показа данных
-	log.Println("📊 Initializing database connection...")
 
 	// Connect to PostgreSQL
 	db, err := sql.Open("postgres", cfg.PaymentDatabaseURL)
@@ -41,7 +41,6 @@ func main() {
 	}
 	defer db.Close()
 
-	// Test connection
 	if err := db.Ping(); err != nil {
 		log.Fatalf("❌ Failed to ping database: %v", err)
 	}

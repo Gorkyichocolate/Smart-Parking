@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"notification-service/internal/domain"
+	"github.com/GorkyiChocolate/smart-parking/services/notification-service/internal/domain"
 )
 
 type NotifierUseCase struct {
@@ -72,43 +72,56 @@ func (uc *NotifierUseCase) SendEmail(notif domain.EmailNotification) error {
 			time.Sleep(delay)
 		}
 
-		err = uc.sendViaSMTP(addr, auth, message)
+		// Передаем email получателя как параметр
+		err = uc.sendViaSMTP(addr, auth, notif.To, message)
 		if err == nil {
-			log.Printf("Email sent successfully to: %s", notif.To)
+			log.Printf("✅ Email sent successfully to: %s", notif.To)
 			return nil
 		}
 
-		log.Printf("Attempt %d failed: %v", attempt+1, err)
+		log.Printf("❌ Attempt %d failed: %v", attempt+1, err)
 	}
 
 	return fmt.Errorf("failed to send email after %d attempts: %w", uc.maxRetries+1, err)
 }
 
-func (uc *NotifierUseCase) sendViaSMTP(addr string, auth smtp.Auth, message string) error {
+// Исправленный метод - добавляем параметр to
+func (uc *NotifierUseCase) sendViaSMTP(addr string, auth smtp.Auth, to, message string) error {
 	client, err := smtp.Dial(addr)
 	if err != nil {
 		return fmt.Errorf("failed to dial SMTP: %w", err)
 	}
 	defer client.Close()
 
+	// Отправляем HELO/EHLO
+	if err = client.Hello(uc.smtpHost); err != nil {
+		return fmt.Errorf("failed to say HELO: %w", err)
+	}
+
+	// STARTTLS
 	if err = client.StartTLS(&tls.Config{
 		ServerName: uc.smtpHost,
+		MinVersion: tls.VersionTLS12,
 	}); err != nil {
 		return fmt.Errorf("failed to start TLS: %w", err)
 	}
 
+	// Аутентификация
 	if err = client.Auth(auth); err != nil {
 		return fmt.Errorf("SMTP auth failed: %w", err)
 	}
 
+	// Отправитель
 	if err = client.Mail(uc.smtpFrom); err != nil {
 		return fmt.Errorf("failed to set from: %w", err)
 	}
 
-	if err = client.Rcpt(uc.smtpTo); err != nil {
+	// Получатель - используем параметр to
+	if err = client.Rcpt(to); err != nil {
 		return fmt.Errorf("failed to set recipient: %w", err)
 	}
 
+	// Тело письма
 	w, err := client.Data()
 	if err != nil {
 		return fmt.Errorf("failed to get data writer: %w", err)
@@ -124,10 +137,24 @@ func (uc *NotifierUseCase) sendViaSMTP(addr string, auth smtp.Auth, message stri
 }
 
 func (uc *NotifierUseCase) ValidateEmail(email string) bool {
-	return strings.Contains(email, "@") && strings.Contains(email, ".")
+	if email == "" {
+		return false
+	}
+	if !strings.Contains(email, "@") {
+		return false
+	}
+	parts := strings.Split(email, "@")
+	if len(parts) != 2 || len(parts[0]) == 0 || len(parts[1]) < 3 {
+		return false
+	}
+	return strings.Contains(parts[1], ".")
 }
 
 func (uc *NotifierUseCase) GetRetryDelay(attempt int) time.Duration {
 	// Exponential backoff: 1s, 2s, 4s, 8s...
-	return time.Duration(1<<uint(attempt)) * time.Second
+	delay := time.Duration(1<<uint(attempt)) * time.Second
+	if delay > 30*time.Second {
+		delay = 30 * time.Second
+	}
+	return delay
 }

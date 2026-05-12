@@ -1,0 +1,43 @@
+{
+"dashboard": {
+"title": "Payment Service Dashboard",
+"panels": [
+{
+"title": "gRPC Requests Rate",
+"targets": [
+{
+"expr": "rate(payment_service_grpc_requests_total[5m])",
+"legendFormat": "{{method}} - {{status}}"
+}
+]
+},
+{
+"title": "gRPC Request Duration",
+"targets": [
+{
+"expr": "histogram_quantile(0.95, rate(payment_service_grpc_request_duration_seconds_bucket[5m]))",
+"legendFormat": "P95 - {{method}}"
+}
+]
+},
+{
+"title": "Payments Created Rate",
+"targets": [
+{
+"expr": "rate(payment_service_payment_created_total[5m])",
+"legendFormat": "Payments per second"
+}
+]
+},
+{
+"title": "Database Connections",
+"targets": [
+{
+"expr": "payment_service_db_connections",
+"legendFormat": "Active connections"
+}
+]
+}
+]
+}
+}
