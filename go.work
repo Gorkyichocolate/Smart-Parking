@@ -1,7 +1,9 @@
-go 1.24.5
+go 1.25.0
 
 use (
 	./pkg
+	./pkg/config
+	./services/apigateway
 	./services/notification-service
 	./services/payment-service
 )

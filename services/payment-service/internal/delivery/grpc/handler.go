@@ -1,38 +1,66 @@
+// internal/delivery/grpc/handler.go
 package grpc
 
 import (
 	"context"
 
-	"payment-service/internal/domain"
-	"payment-service/internal/usecase"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "github.com/Gorkyichocolate/Smart-Parking-Proto/proto/payment"
+	paymentpb "github.com/GorkyiChocolate/smart-parking-proto/gen/go/payment"
+
+	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/domain"
+	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/usecase"
 )
 
-type Handler struct {
-	pb.UnimplementedPaymentServiceServer
-	usecase *usecase.PaymentUsecase
+type PaymentHandler struct {
+	paymentpb.UnimplementedPaymentServiceServer
+	paymentUseCase *usecase.PaymentUseCase
 }
 
-func NewHandler(u *usecase.PaymentUsecase) *Handler {
-	return &Handler{usecase: u}
+func NewPaymentHandler(paymentUseCase *usecase.PaymentUseCase) *PaymentHandler {
+	return &PaymentHandler{
+		paymentUseCase: paymentUseCase,
+	}
 }
 
-func (h *Handler) CreatePayment(ctx context.Context, req *pb.CreatePaymentRequest) (*pb.CreatePaymentResponse, error) {
-
-	payment := domain.Payment{
-		BookingID: req.BookingId,
-		UserID:    req.UserId,
-		Amount:    req.Amount,
+func (h *PaymentHandler) CreatePayment(ctx context.Context, req *paymentpb.CreatePaymentRequest) (*paymentpb.CreatePaymentResponse, error) {
+	input := usecase.CreatePaymentInput{
+		BookingID:     req.BookingId,
+		UserID:        req.UserId,
+		Amount:        req.Amount,
+		PaymentMethod: domain.PaymentMethod(req.PaymentMethod),
+		UserEmail:     req.UserEmail,
 	}
 
-	err := h.usecase.CreatePayment(payment)
+	payment, err := h.paymentUseCase.CreatePayment(ctx, input)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.Internal, "failed to create payment: %v", err)
 	}
 
-	return &pb.CreatePaymentResponse{
+	return &paymentpb.CreatePaymentResponse{
 		Id:     payment.ID,
-		Status: "created",
+		Status: string(payment.Status),
+	}, nil
+}
+
+func (h *PaymentHandler) GetPayment(ctx context.Context, req *paymentpb.GetPaymentRequest) (*paymentpb.GetPaymentResponse, error) {
+	payment, err := h.paymentUseCase.GetPayment(ctx, req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "payment not found: %v", err)
+	}
+
+	return &paymentpb.GetPaymentResponse{
+		Payment: &paymentpb.Payment{
+			Id:            payment.ID,
+			BookingId:     payment.BookingID,
+			UserId:        payment.UserID,
+			Amount:        payment.Amount,
+			Status:        string(payment.Status),
+			PaymentMethod: string(payment.PaymentMethod),
+			CreatedAt:     timestamppb.New(payment.CreatedAt),
+			UpdatedAt:     timestamppb.New(payment.UpdatedAt),
+		},
 	}, nil
 }
