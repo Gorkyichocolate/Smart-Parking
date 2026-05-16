@@ -1,23 +1,29 @@
-module apigateway
+module github.com/Gorkyichocolate/smart-parking/services/apigateway
 
-go 1.23.0
+go 1.21
 
 require (
-	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/gofiber/fiber/v2 v2.52.13 // indirect
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/prometheus/client_golang v1.23.2 // indirect
-	github.com/rabbitmq/amqp091-go v1.11.0 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.51.0 // indirect
-	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	github.com/Gorkyichocolate/smart-parking-proto/gen/go/auth v0.0.0-00010101000000-000000000000
+	github.com/Gorkyichocolate/smart-parking-proto/gen/go/parking v0.0.0-00010101000000-000000000000
+	github.com/Gorkyichocolate/smart-parking-proto/gen/go/payment v0.0.0-00010101000000-000000000000
+	google.golang.org/grpc v1.64.0
+	google.golang.org/protobuf v1.33.0
 )
+
+require (
+	github.com/Gorkyichocolate/smart-parking-proto/gen/go/common v0.0.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
+)
+
+replace github.com/Gorkyichocolate/smart-parking-proto/gen/go => ../../../Smart-Parking-Proto/gen/go
+
+replace github.com/Gorkyichocolate/smart-parking-proto/gen/go/auth => ../../../Smart-Parking-Proto/gen/go/auth
+
+replace github.com/Gorkyichocolate/smart-parking-proto/gen/go/parking => ../../../Smart-Parking-Proto/gen/go/parking
+
+replace github.com/Gorkyichocolate/smart-parking-proto/gen/go/payment => ../../../Smart-Parking-Proto/gen/go/payment
+
+replace github.com/Gorkyichocolate/smart-parking-proto/gen/go/common => ../../../Smart-Parking-Proto/gen/go/common

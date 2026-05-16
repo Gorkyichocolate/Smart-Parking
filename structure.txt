@@ -1,0 +1,161 @@
+.
+├── README.md
+├── deploy
+│   ├── ansible
+│   │   └── setup-k8s.yml
+│   ├── k8s
+│   │   ├── configmap.yaml
+│   │   ├── deployments.yaml
+│   │   ├── namespace.yaml
+│   │   └── services.yaml
+│   └── minikube
+│       └── deploy.sh
+├── docker
+│   ├── docker-compose.yml
+│   ├── grafana
+│   │   ├── dashboards
+│   │   │   └── payment-service.json
+│   │   └── datasources
+│   │       └── prometheus.yml
+│   ├── prometheus.yml
+│   └── start.sh
+├── go.work
+├── go.work.sum
+├── pkg
+│   ├── config
+│   │   ├── config.go
+│   │   ├── go.mod
+│   │   └── go.sum
+│   ├── go.mod
+│   ├── go.sum
+│   ├── jwt
+│   │   └── jwt.go
+│   ├── logger
+│   │   └── logger.go
+│   ├── metrics
+│   │   ├── go.mod
+│   │   ├── go.sum
+│   │   └── metrics.go
+│   ├── middleware
+│   │   └── grpc_middleware.go
+│   ├── migrations
+│   │   ├── ReadDATA
+│   │   ├── auth
+│   │   │   └── 001_create_users_table.sql
+│   │   ├── notification
+│   │   │   └── 0001_create_mail_table.sql
+│   │   ├── parking
+│   │   │   ├── 001_create_parking_zones_table.sql
+│   │   │   ├── 002_create_parking_spots_table.sql
+│   │   │   └── 003_create_bookings_table.sql
+│   │   └── payment
+│   │       ├── 001_create_payments_table.sql
+│   │       └── 002_create_invoices_table.sql
+│   ├── postgres
+│   │   └── postgres.go
+│   ├── rabbitmq
+│   │   ├── connection
+│   │   │   └── connectiong.go
+│   │   ├── consumer
+│   │   │   └── consumer.go
+│   │   └── publisher
+│   │       └── publisher.go
+│   ├── redis
+│   │   └── redis.go
+│   └── utils
+│       └── helpers.go
+├── proto
+│   ├── auth.proto
+│   ├── notification.proto
+│   ├── parking.proto
+│   └── payment.proto
+├── services
+│   ├── Dockerfile
+│   ├── apigateway
+│   │   ├── api
+│   │   │   └── swagger.yaml
+│   │   ├── cmd
+│   │   │   └── main.go
+│   │   ├── go.mod
+│   │   ├── go.sum
+│   │   └── internal
+│   │       ├── delivery
+│   │       │   ├── grpc
+│   │       │   │   └── handler.go
+│   │       │   └── http
+│   │       │       └── handler.go
+│   │       ├── domain
+│   │       │   └── models.go
+│   │       ├── infrastructure
+│   │       │   ├── clients
+│   │       │   │   └── auth_client.go
+│   │       │   └── metrics
+│   │       │       └── prometheus.go
+│   │       ├── repository
+│   │       │   └── cache_repository.go
+│   │       ├── tests
+│   │       │   └── gateway_test.go
+│   │       └── usecase
+│   │           └── gateway_usecase.go
+│   ├── auth-service
+│   │   ├── cmd
+│   │   ├── internal
+│   │   │   ├── delivery
+│   │   │   │   └── grpc
+│   │   │   ├── domain
+│   │   │   ├── repository
+│   │   │   └── usecase
+│   │   └── tests
+│   ├── notification-service
+│   │   ├── Dockerfile
+│   │   ├── cmd
+│   │   │   └── main.go
+│   │   ├── go.mod
+│   │   └── internal
+│   │       ├── domain
+│   │       │   └── notification.go
+│   │       ├── email
+│   │       │   └── sender.go
+│   │       ├── queue
+│   │       │   ├── consumer.go
+│   │       │   └── handler.go
+│   │       └── usecase
+│   │           └── notifier.go
+│   ├── parking-service
+│   │   ├── cmd
+│   │   ├── internal
+│   │   │   ├── delivery
+│   │   │   │   └── grpc
+│   │   │   ├── domain
+│   │   │   ├── repository
+│   │   │   └── usecase
+│   │   └── tests
+│   └── payment-service
+│       ├── cmd
+│       │   └── main.go
+│       ├── go.mod
+│       └── internal
+│           ├── delivery
+│           │   └── grpc
+│           │       └── handler.go
+│           ├── domain
+│           │   ├── invoice.go
+│           │   └── payment.go
+│           ├── infrastructer
+│           │   ├── metrics
+│           │   │   └── prometheus.go
+│           │   ├── rabbitmq
+│           │   │   └── publisher.go
+│           │   └── repository
+│           │       ├── invoice_repo_pg.go
+│           │       └── payment_repo_pg.go
+│           ├── repository
+│           │   ├── invoice_repository.go
+│           │   └── payment_repository.go
+│           ├── tests
+│           │   └── payment_test.go
+│           └── usecase
+│               └── payment_usecase.go
+└── structure.txt
+
+81 directories, 78 files

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GorkyiChocolate/smart-parking/services/notification-service/internal/domain"
+	"github.com/Gorkyichocolate/smart-parking/services/notification-service/internal/domain"
 )
 
 type NotifierUseCase struct {

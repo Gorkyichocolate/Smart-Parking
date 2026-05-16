@@ -4,7 +4,7 @@ package repository
 import (
 	"context"
 
-	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/domain"
+	"github.com/Gorkyichocolate/smart-parking/services/payment-service/internal/domain"
 )
 
 type PaymentRepository interface {

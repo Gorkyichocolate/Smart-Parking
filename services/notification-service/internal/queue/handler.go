@@ -10,9 +10,9 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	"github.com/GorkyiChocolate/smart-parking/services/notification-service/internal/email"
+	"github.com/Gorkyichocolate/smart-parking/services/notification-service/internal/email"
 
-	"github.com/GorkyiChocolate/smart-parking/pkg/metrics"
+	"github.com/Gorkyichocolate/smart-parking/pkg/metrics"
 )
 
 type MessageHandler interface {

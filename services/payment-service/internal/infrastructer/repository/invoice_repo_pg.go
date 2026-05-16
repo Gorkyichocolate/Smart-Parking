@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/domain"
+	"github.com/Gorkyichocolate/smart-parking/services/payment-service/internal/domain"
 )
 
 type InvoiceRepositoryPG struct {

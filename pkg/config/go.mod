@@ -1,4 +1,4 @@
-module github.com/GorkyiChocolate/smart-parking/pkg/config
+module github.com/Gorkyichocolate/smart-parking/pkg/config
 
 go 1.21
 

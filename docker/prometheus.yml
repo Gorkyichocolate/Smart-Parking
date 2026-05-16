@@ -1,14 +1,19 @@
-# docker/prometheus.yml
 global:
   scrape_interval: 15s
-  evaluation_interval: 15s
 
 scrape_configs:
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:9090']
+    metrics_path: '/metrics'
+  - job_name: 'parking-service'
+    static_configs:
+      - targets: ['parking-service:9090']
+    metrics_path: '/metrics'
   - job_name: 'payment-service'
     static_configs:
       - targets: ['payment-service:9090']
     metrics_path: '/metrics'
-
   - job_name: 'notification-service'
     static_configs:
       - targets: ['notification-service:9090']

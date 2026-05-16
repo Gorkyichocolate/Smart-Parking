@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/domain"
-	"github.com/GorkyiChocolate/smart-parking/services/payment-service/internal/repository"
+	"github.com/Gorkyichocolate/smart-parking/services/payment-service/internal/domain"
+	"github.com/Gorkyichocolate/smart-parking/services/payment-service/internal/repository"
 )
 
 type PaymentUseCase struct {

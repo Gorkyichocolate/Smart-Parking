@@ -1,4 +1,4 @@
-module github.com/GorkyiChocolate/smart-parking/pkg/metrics
+module github.com/Gorkyichocolate/smart-parking/pkg/metrics
 
 go 1.21
 
