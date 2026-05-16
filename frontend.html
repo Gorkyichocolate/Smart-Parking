@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking - API Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #1a1a2e; color: #fff; padding: 20px; }
+        h1 { text-align: center; color: #00d4ff; margin-bottom: 30px; }
+        .container { max-width: 900px; margin: 0 auto; display: grid; gap: 20px; }
+        .panel { background: #16213e; border-radius: 10px; padding: 20px; border: 1px solid #0f3460; }
+        .panel h2 { color: #00d4ff; margin-bottom: 15px; font-size: 18px; }
+        .row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        input { flex: 1; min-width: 120px; padding: 10px; border: 1px solid #0f3460; border-radius: 5px; background: #1a1a2e; color: #fff; font-size: 14px; }
+        button { padding: 10px 20px; background: #00d4ff; color: #1a1a2e; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        button:hover { background: #00b4d8; }
+        pre { background: #0f3460; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; max-height: 250px; overflow-y: auto; margin-top: 10px; color: #00ff88; }
+        .url { color: #888; font-size: 11px; margin-bottom: 10px; }
+        .token-display { background: #0f3460; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 11px; word-break: break-all; color: #ffcc00; }
+    </style>
+</head>
+<body>
+    <h1>🅿️ Smart Parking - API Test</h1>
+    <div class="container">
+
+        <!-- AUTH -->
+        <div class="panel">
+            <h2>🔐 Auth</h2>
+            <div class="url">POST /api/auth/register | POST /api/auth/login</div>
+            <div class="row">
+                <input type="email" id="email" placeholder="Email" value="test@test.com">
+                <input type="password" id="password" placeholder="Password" value="123456">
+                <input type="text" id="fullname" placeholder="Full Name" value="Test User">
+            </div>
+            <div class="row">
+                <button onclick="register()">Register</button>
+                <button onclick="login()">Login</button>
+            </div>
+            <div class="token-display" id="tokenDisplay"></div>
+            <pre id="authResult">...</pre>
+        </div>
+
+        <!-- PARKING ZONES -->
+        <div class="panel">
+            <h2>🅿️ Parking Zones</h2>
+            <div class="url">GET /api/parking/zones | GET /api/parking/free-spots?zone_id=zone_center</div>
+            <div class="row">
+                <button onclick="getZones()">Get Zones</button>
+                <button onclick="getFreeSpots()">Free Spots</button>
+            </div>
+            <pre id="zonesResult">...</pre>
+        </div>
+
+        <!-- BOOKING -->
+        <div class="panel">
+            <h2>📅 Booking</h2>
+            <div class="url">POST /api/parking/booking</div>
+            <div class="row">
+                <input type="text" id="userId" placeholder="User ID">
+                <input type="text" id="spotId" placeholder="Spot ID" value="spot_center_A1">
+            </div>
+            <div class="row">
+                <input type="datetime-local" id="startTime" value="2026-05-17T10:00">
+                <input type="datetime-local" id="endTime" value="2026-05-17T12:00">
+            </div>
+            <div class="row">
+                <button onclick="createBooking()">Create Booking</button>
+                <button onclick="getBooking()">Get Booking</button>
+                <input type="text" id="bookingId" placeholder="Booking ID" style="flex:2">
+            </div>
+            <pre id="bookingResult">...</pre>
+        </div>
+
+        <!-- PAYMENT -->
+        <div class="panel">
+            <h2>💰 Payment</h2>
+            <div class="url">POST /api/payment/create | GET /api/payment/get?id=</div>
+            <div class="row">
+                <input type="text" id="payBookingId" placeholder="Booking ID" value="test-123">
+                <input type="text" id="payUserId" placeholder="User ID" value="test-user">
+                <input type="number" id="amount" placeholder="Amount" value="1000">
+            </div>
+            <div class="row">
+                <button onclick="createPayment()">Create Payment</button>
+                <button onclick="getPayment()">Get Payment</button>
+                <input type="text" id="paymentId" placeholder="Payment ID" style="flex:2">
+            </div>
+            <pre id="paymentResult">...</pre>
+        </div>
+
+        <!-- HEALTH -->
+        <div class="panel">
+            <h2>❤️ Health</h2>
+            <button onclick="health()">Check Health</button>
+            <pre id="healthResult">...</pre>
+        </div>
+    </div>
+
+    <script>
+        const BASE = 'http://localhost:8080';
+        let token = '';
+
+        async function api(method, path, body = null) {
+            const opts = { method, headers: { 'Content-Type': 'application/json' } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(BASE + path, opts);
+            return res.json();
+        }
+
+        async function register() {
+            const r = await api('POST', '/api/auth/register', {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                full_name: document.getElementById('fullname').value,
+                role: 'driver'
+            });
+            document.getElementById('authResult').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function login() {
+            const r = await api('POST', '/api/auth/login', {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            });
+            document.getElementById('authResult').textContent = JSON.stringify(r, null, 2);
+            if (r.access_token) {
+                token = r.access_token;
+                document.getElementById('tokenDisplay').textContent = 'Token: ' + r.access_token.substring(0, 50) + '...';
+                document.getElementById('userId').value = '';
+            }
+        }
+
+        async function getZones() {
+            const r = await api('GET', '/api/parking/zones');
+            document.getElementById('zonesResult').textContent = JSON.stringify(r, null, 2);
+            if (r.zones && r.zones.length > 0) {
+                document.getElementById('spotId').value = 'spot_' + r.zones[0].id + '_A1';
+            }
+        }
+
+        async function getFreeSpots() {
+            const r = await api('GET', '/api/parking/free-spots?zone_id=zone_center');
+            document.getElementById('zonesResult').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function createBooking() {
+            const startTime = new Date(document.getElementById('startTime').value).toISOString();
+            const endTime = new Date(document.getElementById('endTime').value).toISOString();
+            const r = await api('POST', '/api/parking/booking', {
+                user_id: document.getElementById('userId').value,
+                spot_id: document.getElementById('spotId').value,
+                start_time: startTime,
+                end_time: endTime
+            });
+            document.getElementById('bookingResult').textContent = JSON.stringify(r, null, 2);
+            if (r.booking) {
+                document.getElementById('bookingId').value = r.booking.id;
+            }
+        }
+
+        async function getBooking() {
+            const id = document.getElementById('bookingId').value;
+            const r = await api('GET', '/api/parking/booking/get?id=' + id);
+            document.getElementById('bookingResult').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function createPayment() {
+            const r = await api('POST', '/api/payment/create', {
+                booking_id: document.getElementById('payBookingId').value,
+                user_id: document.getElementById('payUserId').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                payment_method: 'card',
+                user_email: document.getElementById('email').value
+            });
+            document.getElementById('paymentResult').textContent = JSON.stringify(r, null, 2);
+            if (r.id) {
+                document.getElementById('paymentId').value = r.id;
+            }
+        }
+
+        async function getPayment() {
+            const id = document.getElementById('paymentId').value;
+            const r = await api('GET', '/api/payment/get?id=' + id);
+            document.getElementById('paymentResult').textContent = JSON.stringify(r, null, 2);
+        }
+
+        async function health() {
+            const r = await api('GET', '/health');
+            document.getElementById('healthResult').textContent = JSON.stringify(r, null, 2);
+        }
+
+        // Load on start
+        health();
+    </script>
+</body>
+</html>
